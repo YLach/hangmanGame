@@ -15,7 +15,6 @@ import java.net.SocketException;
  * @author YannL
  */
 public class HangmanServer {
-
     // Help message to use the server
     static final String USAGE = "java HangmanServer [port]";
 
@@ -33,7 +32,7 @@ public class HangmanServer {
                 System.out.println(USAGE);
                 System.exit(1);
             }
-            
+
             try {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
@@ -41,7 +40,7 @@ public class HangmanServer {
                 System.exit(1);
             }
         }
-        
+
         // Creation of a listening socket bound to the specific port
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
@@ -50,17 +49,20 @@ public class HangmanServer {
                     // Wait for a client connection request
                     Socket clientSocket = serverSocket.accept();
                     // Communicate with a client via clientSocket
-                    System.out.println("Client connected");
+                    new Thread(new ConnectionHandler(clientSocket)).start();
+
                     // Close the socket and wait for another connection
-                    clientSocket.close();
-                    System.out.println("Client deconnected");
+                    //clientSocket.close();
+
                 } catch (SocketException e) {
                     System.err.println(e);
                 }
             }
 
         } catch (IOException ex) {
-            System.err.println("Error while creating the server listening socket : " + ex);
+            System.err.println("Error while creating the server listening socket on port " + port + " : " + ex);
+            System.exit(1);
         }
     }
+
 }
