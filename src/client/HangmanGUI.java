@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 import javafx.application.Application;
@@ -110,7 +105,7 @@ public class HangmanGUI extends Application {
 
 
         // Add a title
-        Text title = new Text("Hangman Name");
+        Text title = new Text("Hangman Game");
         title.setFont(Font.font("Tahoma", FontWeight.BOLD, 20));
         HBox hbTitle = new HBox(title);
         hbTitle.setAlignment(Pos.CENTER);
@@ -192,8 +187,7 @@ public class HangmanGUI extends Application {
         // Connection to the server
         new ConnectService(ipAddress, port).start();
         game = new Game();
-        updateGUI();
-        new CallService(Game.NEW_GAME).start();
+        //(new CallService(Game.NEW_GAME)).start();
     }
 
     /**
@@ -206,11 +200,11 @@ public class HangmanGUI extends Application {
     }
 
     private void updateGUI(){
-        System.out.println("WORD = " + game.getWordToGuess() + " ATTEMPTS = " +
-                game.getNbFailedAttempts() + " SCORE = " + game.getScore());
+        //System.out.println("WORD = " + game.getCurrentViewOfWord() + " ATTEMPTS = " +
+        //        game.getNbFailedAttempts() + " SCORE = " + game.getScore());
 
-        if (!wordToGuess.equals(game.getWordToGuess()))
-            wordToGuess.setText(game.getWordToGuess().toString());
+        if (!wordToGuess.equals(game.getCurrentViewOfWord())) //TODO incompatible types
+            wordToGuess.setText(game.getCurrentViewOfWord().toString());
 
         try {
             if (Integer.parseInt(attemptsValue.getText()) != game.getNbFailedAttempts())
@@ -264,28 +258,32 @@ public class HangmanGUI extends Application {
         String toServer;
         private CallService(String toServer) {
             this.toServer = toServer;
-            if (toServer.equals(Game.NEW_GAME))
-                gameStatus.setDisable(true);
+            if (toServer.equals(Game.NEW_GAME)) {
+                gameStatus.setVisible(false);
+                wordPropTextField.clear();
+                game.newGame();
+            }
 
             setOnSucceeded((WorkerStateEvent event) -> {
-                System.out.println("From server : " + getValue());
-                String[] fromServer = getValue().split("[ ]+");
+                String[] fromServer = getValue().split("\\+");
+                //System.out.println("From Server : " + getValue());
                 if (fromServer[0].equals(Game.GAME_OVER)) {
                     // Client loses
                     game.setScore(Integer.parseInt(fromServer[1]));
+                    game.setStatusToFinished();
                     gameStatus.setText("Game Over looser !");
                     gameStatus.setFill(Color.RED);
-                    gameStatus.setDisable(false);
+                    gameStatus.setVisible(true);
                 } else if (fromServer[0].equals(Game.GAME_WIN)) {
                     // Client wins
-                    game.modifyWordToGuess(fromServer[1]);
+                    game.modifyCurrentViewOfWord(fromServer[1]);
+                    game.setStatusToFinished();
                     game.setScore(Integer.parseInt(fromServer[2]));
                     gameStatus.setText("Congratulation, you win !");
                     gameStatus.setFill(Color.GREEN);
-                    gameStatus.setDisable(false);
+                    gameStatus.setVisible(true);
                 } else {
-                    System.out.println(fromServer[0]);
-                    game.modifyWordToGuess(fromServer[0]);
+                    game.modifyCurrentViewOfWord(fromServer[0]);
                     game.setNbFailedAttempts(Integer.parseInt(fromServer[1]));
                 }
                 updateGUI();
@@ -317,7 +315,6 @@ public class HangmanGUI extends Application {
 
         @Override
         public void handle(ActionEvent event) {
-            //TODO Send the letter to the server
             new CallService(Character.toString(letter)).start();
         }
     }
@@ -331,8 +328,7 @@ public class HangmanGUI extends Application {
 
         @Override
         public void handle(ActionEvent event) {
-            //TODO get the value of the textfield corresponding to the word
-            new CallService(wordPropTextField.getText()).start();
+            new CallService(wordPropTextField.getText().toUpperCase()).start();
         }
     }
 
@@ -345,7 +341,6 @@ public class HangmanGUI extends Application {
 
         @Override
         public void handle(ActionEvent event) {
-            //TODO get the value of the textfield corresponding to the word
             new CallService(Game.NEW_GAME).start();
         }
     }
