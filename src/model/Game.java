@@ -1,8 +1,6 @@
 package model;
 
-/**
- * Created by YannL on 09/11/2016.
- */
+
 public class Game {
     public final static String NEW_GAME = "newgame";
     public final static String GAME_OVER = "gameover";
@@ -14,22 +12,13 @@ public class Game {
     protected boolean isFinished;
 
     public Game() {
-        this.score = 0;
-        this.nbFailedAttempts = 0;
     }
 
     public void newGame() {
         isFinished = false;
-        this.nbFailedAttempts = 0;
-        //this.currentWorToGuess = new StringBuilder(new String(new char[length]).replace("\0", "-"));
     }
 
-
-    public void modifyCurrentViewOfWord(String currentView) {
-        if (!isFinished)
-            currentWorToGuess = new StringBuilder(currentView);
-    }
-
+    // Getters
     public int getScore() {
         return score;
     }
@@ -40,6 +29,12 @@ public class Game {
 
     public int getNbFailedAttempts() {
         return nbFailedAttempts;
+    }
+
+    // Setters
+    public void modifyCurrentViewOfWord(String currentView) {
+        if (!isFinished)
+            currentWorToGuess = new StringBuilder(currentView);
     }
 
     public void setScore(int score) {

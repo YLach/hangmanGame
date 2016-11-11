@@ -21,16 +21,16 @@ import java.util.List;
  */
 public class HangmanServer {
     // Help message to use the server
-    static final String USAGE = "java HangmanServer [port]";
+    private static final String USAGE = "java HangmanServer [port]";
 
     // File containing
-    static final String DICTIONARY_FILE = "res/words.txt";
+    private static final String DICTIONARY_FILE = "res/words.txt";
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // Port number of the ServerSocket
+        // Default port number of the ServerSocket
         int port = 8080;
 
         // Parse input arguments

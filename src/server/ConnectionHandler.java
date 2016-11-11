@@ -1,6 +1,5 @@
 package server;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import model.Game;
 import model.GameServer;
 
@@ -55,10 +54,14 @@ public class ConnectionHandler implements Runnable {
                 }
 
                 String fromClient = new String(msg, 0, bytesRead);
-                //System.out.println("From client : " + fromClient);
+
+
+                System.out.println("From client : " + fromClient); // TODO : to remove
 
                 byte[] answer;
                 StringBuilder sb = new StringBuilder();
+
+                // Communication protocol for our game
                 if (bytesRead == 1) {
                     // Letter proposed
                     if (!game.containLetter(fromClient.charAt(0)))

@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import model.Game;
 
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -28,17 +29,15 @@ import java.util.List;
  * @author YannL
  */
 public class HangmanGUI extends Application {
-    // Help message to use the client
-    static final String USAGE = "java HangmanClient [serverIP] [port]";
+    // Help message to use the application
+    private static final String USAGE = "java HangmanGUI [serverIP] [port]";
 
     // IP adress of the server
-    String ipAddress = "localhost";
+    private String ipAddress = "localhost";
     // Port number of the server
-    int port = 80;
+    private int port = 80;
 
-    // Timeout (in ms)
-    static final int TIMEOUT = 1000;
-
+    // Dynamic elements
     private TextField wordPropTextField;
     private Button validatePropButton;
     private Button newGameButton;
@@ -46,6 +45,7 @@ public class HangmanGUI extends Application {
     private Text gameStatus;
     private Text attemptsValue;
     private Text scoreValue;
+    private List<Button> letterButtons;
 
     private ServerConnection serverConnection;
     private Game game;
@@ -91,7 +91,7 @@ public class HangmanGUI extends Application {
 
         // Set parameters of our application
         primaryStage.setMinWidth(500);
-        primaryStage.setMinHeight(250);
+        primaryStage.setMinHeight(350);
         primaryStage.setTitle("Hangman Game");
 
 
@@ -125,8 +125,10 @@ public class HangmanGUI extends Application {
         statsPane.add(scoreValue, 1, 0);
         // Attempts
         Text attempts = new Text("Failed attempts :");
+        attempts.setFill(Color.RED);
         statsPane.add(attempts, 0, 1);
         attemptsValue = new Text();
+        attemptsValue.setFill(Color.RED);
         statsPane.add(attemptsValue, 1, 1);
         rootNode.add(hbScore, 1, 1);
 
@@ -142,12 +144,14 @@ public class HangmanGUI extends Application {
         // Letters
         GridPane alphabetPane = new GridPane();
         int aCode= (int)'A';
+        letterButtons = new LinkedList<>();
         for (int i = 0; i < 26; i++) {
             char letter = (char) (aCode + i); // Corresponding letter
             Button b = new Button(Character.toString(letter));
             // Add Handler
             b.setOnAction(new letterButtonHandler(letter));
             b.setMinWidth(30);
+            letterButtons.add(b);
             alphabetPane.add(b, i%13, (i < 13 ? 0 : 1));
         }
         rootNode.add(alphabetPane, 0, 3, 2, 1);
@@ -199,10 +203,7 @@ public class HangmanGUI extends Application {
         serverConnection.deconnection();
     }
 
-    private void updateGUI(){
-        //System.out.println("WORD = " + game.getCurrentViewOfWord() + " ATTEMPTS = " +
-        //        game.getNbFailedAttempts() + " SCORE = " + game.getScore());
-
+    private void updateGUI() {
         if (!wordToGuess.equals(game.getCurrentViewOfWord())) //TODO incompatible types
             wordToGuess.setText(game.getCurrentViewOfWord().toString());
 
@@ -220,7 +221,6 @@ public class HangmanGUI extends Application {
             scoreValue.setText(String.valueOf(game.getScore()));
         }
     }
-
 
     /**
      * TODO
@@ -260,22 +260,38 @@ public class HangmanGUI extends Application {
             this.toServer = toServer;
             if (toServer.equals(Game.NEW_GAME)) {
                 gameStatus.setVisible(false);
+                wordPropTextField.setDisable(false);
+                validatePropButton.setDisable(false);
+                for (Button b : letterButtons)
+                    b.setDisable(false);
                 wordPropTextField.clear();
                 game.newGame();
             }
 
             setOnSucceeded((WorkerStateEvent event) -> {
                 String[] fromServer = getValue().split("\\+");
-                //System.out.println("From Server : " + getValue());
+
+                System.out.println("From Server : " + getValue()); // TODO : to remove
+
                 if (fromServer[0].equals(Game.GAME_OVER)) {
                     // Client loses
+                    wordPropTextField.setDisable(true);
+                    validatePropButton.setDisable(true);
+                    for (Button b : letterButtons)
+                        b.setDisable(true);
+
                     game.setScore(Integer.parseInt(fromServer[1]));
                     game.setStatusToFinished();
-                    gameStatus.setText("Game Over looser !");
+                    gameStatus.setText("Game Over !");
                     gameStatus.setFill(Color.RED);
                     gameStatus.setVisible(true);
                 } else if (fromServer[0].equals(Game.GAME_WIN)) {
                     // Client wins
+                    wordPropTextField.setDisable(true);
+                    validatePropButton.setDisable(true);
+                    for (Button b : letterButtons)
+                        b.setDisable(true);
+
                     game.modifyCurrentViewOfWord(fromServer[1]);
                     game.setStatusToFinished();
                     game.setScore(Integer.parseInt(fromServer[2]));

@@ -1,6 +1,5 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -8,29 +7,32 @@ import java.util.Random;
 public class GameServer extends Game {
     private String wordToFind;
     private int maxFailedAttempts;
-    private List<String> dictionnary;
+    private List<String> dictionary;
     private Random r;
 
     public GameServer(List<String> words, int nbAttempts) {
         super();
-        this.maxFailedAttempts = nbAttempts;
-        this.dictionnary = words;
+        score = 0;
+        nbFailedAttempts = 0;
+        maxFailedAttempts = nbAttempts;
+        dictionary = words;
         r = new Random(); // TODO : need a seed ?
         newGame();
     }
 
     public void newGame() {
+        nbFailedAttempts = 0;
         pickNewWord();
-        System.out.println("WORD TO FIND : " + wordToFind);
+        System.out.println("[WORD TO FIND] : " + wordToFind);
         //super.newGame(wordToFind.length());
         currentWorToGuess = new StringBuilder(new String(new char[wordToFind.length()]).replace("\0", "-"));
         super.newGame();
     }
 
     private void pickNewWord() {
-        if (dictionnary != null) {
-            int index = r.nextInt(dictionnary.size() - 1);
-            wordToFind = dictionnary.get(index);
+        if (dictionary != null) {
+            int index = r.nextInt(dictionary.size() - 1);
+            wordToFind = dictionary.get(index);
         }
     }
 
